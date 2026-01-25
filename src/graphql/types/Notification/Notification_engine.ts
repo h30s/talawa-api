@@ -274,7 +274,9 @@ export class NotificationEngine {
 	}
 
 	/**
-	 * Creates audience entries for a notification
+	 * Creates audience entries for a notification.
+	 * Uses the shared resolveAudienceToUserIds method to resolve user IDs,
+	 * ensuring consistent behavior with email notifications.
 	 *
 	 * @param notificationId - ID of the notification log
 	 * @param audience - Specification of the target audience
@@ -283,59 +285,12 @@ export class NotificationEngine {
 		notificationId: string,
 		audience: NotificationAudience,
 	): Promise<void> {
-		const { targetType, targetIds } = audience;
 		const senderId = this.ctx.currentClient.isAuthenticated
 			? this.ctx.currentClient.user.id
 			: null;
 
-		let userIds: string[] = [];
-
-		if (targetType === NotificationTargetType.USER) {
-			userIds = targetIds.filter((id) => id !== senderId);
-		} else if (targetType === NotificationTargetType.ORGANIZATION_ADMIN) {
-			const orgId = targetIds[0];
-			if (!orgId) return;
-
-			const adminMembers =
-				await this.ctx.drizzleClient.query.organizationMembershipsTable.findMany(
-					{
-						columns: { memberId: true },
-						where: (fields, operators) =>
-							and(
-								operators.eq(fields.organizationId, orgId),
-								operators.eq(fields.role, "administrator"),
-							),
-					},
-				);
-
-			userIds = adminMembers
-				.map((member) => member.memberId)
-				.filter((id) => id !== senderId);
-		} else if (targetType === NotificationTargetType.ADMIN) {
-			const admins = await this.ctx.drizzleClient.query.usersTable.findMany({
-				columns: { id: true },
-				where: (fields, operators) =>
-					operators.eq(fields.role, "administrator"),
-			});
-
-			userIds = admins.map((admin) => admin.id).filter((id) => id !== senderId);
-		} else if (targetType === NotificationTargetType.ORGANIZATION) {
-			const orgId = targetIds[0];
-			if (!orgId) return;
-
-			const members =
-				await this.ctx.drizzleClient.query.organizationMembershipsTable.findMany(
-					{
-						columns: { memberId: true },
-						where: (fields, operators) =>
-							operators.eq(fields.organizationId, orgId),
-					},
-				);
-
-			userIds = members
-				.map((member) => member.memberId)
-				.filter((id) => id !== senderId);
-		}
+		// Reuse the shared audience resolution logic
+		const userIds = await this.resolveAudienceToUserIds(audience, senderId);
 
 		if (userIds.length > 0) {
 			await this.ctx.drizzleClient.insert(notificationAudienceTable).values(
