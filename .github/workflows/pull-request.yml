@@ -501,15 +501,42 @@ jobs:
               -f ./compose.yaml -f ./docker/compose.rootless.production.yaml "$@"
           }
 
-          http_port="$(dc port caddy 80 | head -n 1 | awk -F: '{print $2}')"
-          if [ -z "$http_port" ]; then
-            echo "::error::Failed to determine published HTTP port for Caddy."
+          # Wait for Caddy port to be published (with retry)
+          CADDY_RETRIES=10
+          until http_port="$(dc port caddy 80 | head -n 1 | awk -F: '{print $2}')" && [ -n "$http_port" ]; do
+            CADDY_RETRIES=$((CADDY_RETRIES - 1))
+            if [ "$CADDY_RETRIES" -le 0 ]; then
+              echo "::error::Failed to determine published HTTP port for Caddy after 20s."
+              dc ps
+              exit 1
+            fi
+            echo "Waiting for Caddy port mapping... ($CADDY_RETRIES retries left)"
+            sleep 2
+          done
+
+          echo "Caddy port: $http_port"
+
+          # Poll Caddy until it's ready to accept connections
+          echo "Waiting for Caddy to initialize..."
+          CADDY_READY_RETRIES=10
+          until curl -fsS -m 2 "http://localhost:${http_port}/" >/dev/null 2>&1 || [ "$CADDY_READY_RETRIES" -le 0 ]; do
+            CADDY_READY_RETRIES=$((CADDY_READY_RETRIES - 1))
+            echo "Caddy not ready yet... ($CADDY_READY_RETRIES retries left)"
+            sleep 1
+          done
+
+          # Re-probe to determine actual success/failure (fixes off-by-one)
+          if ! curl -fsS -m 2 "http://localhost:${http_port}/" >/dev/null 2>&1; then
+            echo "::error::Caddy failed to become ready after 10s."
             dc ps
+            dc logs caddy
             exit 1
           fi
 
+          echo "Caddy is ready!"
+
           echo "Checking health endpoint via Caddy on http://localhost:${http_port}/healthcheck"
-          curl -fsS --retry 5 --retry-delay 3 --max-time 10 "http://localhost:${http_port}/healthcheck" > /dev/null
+          curl -fsS --retry 10 --retry-delay 2 --max-time 10 "http://localhost:${http_port}/healthcheck" > /dev/null
 
       - name: Stop rootless production stack
         if: always()
@@ -652,7 +679,7 @@ jobs:
     needs: [Code-Quality-Checks]
     uses: PalisadoesFoundation/.github/.github/workflows/typescript-autodocs.yml@main
     with:
-      pnpm-version: "10.26.1"
+      pnpm-version: "10.28.1" # This version should match package.json packageManager field
   Generate-Schema-Docs:
     if: ${{ github.actor != 'dependabot[bot]' }}
     name: Generate GraphQL Schema Documentation
@@ -730,30 +757,30 @@ jobs:
       # a patched simplecov so we can use simplecov-html 0.12.3 (Ruby 3.2 compatible)
       - name: Prepare simplecov for Ruby 3.2
         run: |
-          mkdir -p tests/install/vendor
-          git clone --depth 1 --branch v0.21.2 https://github.com/simplecov-ruby/simplecov.git tests/install/vendor/simplecov
-          sed -i 's/simplecov-html", "~> 0.11/simplecov-html", ">= 0.11/' tests/install/vendor/simplecov/simplecov.gemspec
+          mkdir -p test/install_scripts/vendor
+          git clone --depth 1 --branch v0.21.2 https://github.com/simplecov-ruby/simplecov.git test/install_scripts/vendor/simplecov
+          sed -i 's/simplecov-html", "~> 0.11/simplecov-html", ">= 0.11/' test/install_scripts/vendor/simplecov/simplecov.gemspec
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2"
           bundler-cache: true
-          working-directory: tests/install
+          working-directory: test/install_scripts
       - name: Run install script tests with coverage
-        working-directory: tests/install
+        working-directory: test/install_scripts
         run: |
           chmod +x run-all.sh
           bundle exec bashcov --root ../.. -- ./run-all.sh
       # Upload only when coverage file exists so the install flag gets data and shows in Codecov
       - name: Upload install coverage to Codecov
-        if: "!cancelled() && hashFiles('tests/install/coverage/coverage.xml') != ''"
+        if: "!cancelled() && hashFiles('test/install_scripts/coverage/coverage.xml') != ''"
         uses: codecov/codecov-action@v5
         with:
           name: "${{env.CODECOV_UNIQUE_NAME}}-install"
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: true
-          files: tests/install/coverage/coverage.xml
+          files: test/install_scripts/coverage/coverage.xml
           flags: install
 
   Run-Tests:
@@ -1114,6 +1141,15 @@ jobs:
           cp envFiles/.env.devcontainer .env
           devcontainer up --workspace-folder . --config .devcontainer/default/devcontainer.json
           echo "Devcontainer started"
+
+      - name: Validate Devcontainer Environment
+        run: |
+          echo "Running environment validation checks..."
+          # Run ONLY the validation script (lightweight, doesn't reinstall everything)
+          docker exec talawa-api-1 /bin/bash -c "cd /home/talawa/api && ./.devcontainer/validate-setup.sh"
+          # If validation fails, this step will fail
+          echo "Environment validation passed"
+
       - name: Wait for Postgres in devcontainer before migrations
         run: |
           set -euo pipefail
@@ -1197,6 +1233,15 @@ jobs:
         run: cp envFiles/.env.devcontainer .env
       - name: Bring up devcontainer
         run: devcontainer up --workspace-folder . --config .devcontainer/default/devcontainer.json
+
+      - name: Validate Devcontainer Environment
+        run: |
+          echo "Running environment validation checks..."
+          # Run ONLY the validation script (lightweight, doesn't reinstall everything)
+          docker exec talawa-api-1 /bin/bash -c "cd /home/talawa/api && ./.devcontainer/validate-setup.sh"
+          # If validation fails, this step will fail
+          echo "Environment validation passed"
+
       - name: Wait for Postgres in devcontainer
         run: |
           set -euo pipefail
@@ -1220,7 +1265,7 @@ jobs:
           sleep 10
       - name: Verify Running Containers
         run: docker ps
-      - name: Resolve API container
+      - name: Start server and monitor logs
         id: api-container
         run: |
           API_CONTAINER=$(docker compose ps -q api 2>/dev/null || true)
