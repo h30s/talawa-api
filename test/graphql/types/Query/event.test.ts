@@ -382,6 +382,8 @@ suite("Query field event", () => {
 			);
 		}
 
+		assertToBeNonNullish(eventId);
+
 		return {
 			organization,
 			eventId,
@@ -1079,6 +1081,9 @@ suite("Query field event", () => {
 					testCleanupFunctions,
 				);
 
+				assertToBeNonNullish(eventId);
+				assertToBeNonNullish(regularUserToken);
+
 				// Register the regular user for the event (but don't invite)
 				// Use the regular user's token so they are the registered attendee
 				await mercuriusClient.mutate(Mutation_registerForEvent, {
@@ -1116,6 +1121,10 @@ suite("Query field event", () => {
 						adminUserId,
 						testCleanupFunctions,
 					);
+
+				assertToBeNonNullish(eventId);
+				assertToBeNonNullish(regularUserId);
+				assertToBeNonNullish(regularUserToken);
 
 				// Invite the regular user to the event
 				// This creates an event_attendees record with isInvited: true
@@ -1158,6 +1167,9 @@ suite("Query field event", () => {
 				);
 				const eventId = result.eventId;
 				const regularUserToken = result.regularUserToken;
+
+				assertToBeNonNullish(eventId);
+				assertToBeNonNullish(regularUserToken);
 
 				// Unauthorized regular member cannot access the invite-only event
 				const queryResult = await mercuriusClient.query(Query_event, {
