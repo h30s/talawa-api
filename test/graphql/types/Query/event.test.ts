@@ -209,31 +209,36 @@ suite("Query field event", () => {
 		});
 
 		const user = userResult.data?.createUser;
+
+		// Register cleanup immediately after creation in case deletion fails
+		if (user?.user?.id) {
+			const userId = user.user.id;
+			cleanupFunctions.push(async () => {
+				try {
+					await mercuriusClient.mutate(Mutation_deleteUser, {
+						headers: {
+							authorization: `bearer ${authToken}`,
+						},
+						variables: {
+							input: {
+								id: userId,
+							},
+						},
+					});
+				} catch (error) {
+					console.error(
+						"Failed to cleanup user in createUserAndReturnStaleToken:",
+						error,
+					);
+				}
+			});
+		}
+
 		assertToBeNonNullish(user);
 		assertToBeNonNullish(user.authenticationToken);
 		assertToBeNonNullish(user.user);
 
-		// Register cleanup immediately after creation in case deletion fails
 		const userId = user.user.id;
-		cleanupFunctions.push(async () => {
-			try {
-				await mercuriusClient.mutate(Mutation_deleteUser, {
-					headers: {
-						authorization: `bearer ${authToken}`,
-					},
-					variables: {
-						input: {
-							id: userId,
-						},
-					},
-				});
-			} catch (error) {
-				console.error(
-					"Failed to cleanup user in createUserAndReturnStaleToken:",
-					error,
-				);
-			}
-		});
 
 		// Attempt deletion - if it fails, cleanup will handle it
 		try {
@@ -877,10 +882,12 @@ suite("Query field event", () => {
 			expect(queriedEvent.id).toBe(pastEvent.id);
 			assertToBeNonNullish(queriedEvent.startAt);
 			assertToBeNonNullish(queriedEvent.endAt);
-			expect(new Date(queriedEvent.startAt).getTime()).toBe(
+			expect(new Date(queriedEvent.startAt as string).getTime()).toBe(
 				pastStartAt.getTime(),
 			);
-			expect(new Date(queriedEvent.endAt).getTime()).toBe(pastEndAt.getTime());
+			expect(new Date(queriedEvent.endAt as string).getTime()).toBe(
+				pastEndAt.getTime(),
+			);
 		});
 
 		test("handles multi-day events correctly", async () => {
@@ -950,8 +957,8 @@ suite("Query field event", () => {
 
 			assertToBeNonNullish(queriedEvent.startAt);
 			assertToBeNonNullish(queriedEvent.endAt);
-			const startDate = new Date(queriedEvent.startAt);
-			const endDate = new Date(queriedEvent.endAt);
+			const startDate = new Date(queriedEvent.startAt as string);
+			const endDate = new Date(queriedEvent.endAt as string);
 			const durationInDays =
 				(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 			expect(durationInDays).toBeGreaterThan(1);
@@ -978,16 +985,17 @@ suite("Query field event", () => {
 			const { authToken, userId } = await getAdminTokenAndUserId();
 
 			const organization = await createTestOrganization(authToken, userId);
-			assertToBeNonNullish(organization);
-			const organizationId = organization.id;
 
 			// Cleanup: Delete organization
 			testCleanupFunctions.push(async () => {
 				await mercuriusClient.mutate(Mutation_deleteOrganization, {
 					headers: { authorization: `bearer ${authToken}` },
-					variables: { input: { id: organizationId } },
+					variables: { input: { id: organization.id } },
 				});
 			});
+
+			assertToBeNonNullish(organization);
+			const organizationId = organization.id;
 
 			// Create never-ending recurring event
 			const createEventResult = await mercuriusClient.mutate(
@@ -1036,17 +1044,6 @@ suite("Query field event", () => {
 			}
 
 			assertToBeNonNullish(baseRecurringEventId);
-
-			if (createEventResult.errors && createEventResult.errors.length > 0) {
-				throw new Error(
-					`createEvent GraphQL errors: ${JSON.stringify(createEventResult.errors, null, 2)}`,
-				);
-			}
-			if (!createEventResult.data || !createEventResult.data.createEvent) {
-				throw new Error(
-					`createEvent returned no data. full response: ${JSON.stringify(createEventResult.data, null, 2)}`,
-				);
-			}
 
 			const instancesResult = await mercuriusClient.query(
 				Query_getRecurringEvents,
