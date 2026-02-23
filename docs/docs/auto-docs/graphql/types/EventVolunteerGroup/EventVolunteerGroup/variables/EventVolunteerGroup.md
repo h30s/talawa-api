@@ -4,7 +4,7 @@
 
 # Variable: EventVolunteerGroup
 
-> **EventVolunteerGroup**: `ImplementableObjectRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../../scalars/type-aliases/CustomScalars.md); \}\>, [`EventVolunteerGroup`](../type-aliases/EventVolunteerGroup.md), [`EventVolunteerGroup`](../type-aliases/EventVolunteerGroup.md)\>
+> **EventVolunteerGroup**: `ImplementableObjectRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../../scalars/type-aliases/CustomScalars.md); \}\>, [`EventVolunteerGroup`](../type-aliases/EventVolunteerGroup.md), [`EventVolunteerGroup`](../type-aliases/EventVolunteerGroup.md)\>
 
 Defined in: [src/graphql/types/EventVolunteerGroup/EventVolunteerGroup.ts:4](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/types/EventVolunteerGroup/EventVolunteerGroup.ts#L4)
 

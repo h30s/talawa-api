@@ -4,7 +4,7 @@
 
 # Variable: VolunteerMembershipFilter
 
-> `const` **VolunteerMembershipFilter**: `EnumRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, `"group"` \| `"individual"`, `"group"` \| `"individual"`\>
+> `const` **VolunteerMembershipFilter**: `EnumRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, `"group"` \| `"individual"`, `"group"` \| `"individual"`\>
 
 Defined in: [src/graphql/enums/VolunteerMembershipFilter.ts:7](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/enums/VolunteerMembershipFilter.ts#L7)
 

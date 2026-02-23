@@ -18,4 +18,4 @@ Defined in: [src/graphql/types/Plugin/inputs.ts:125](https://github.com/Palisado
 
 ### type
 
-> **type**: `InputObjectRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `isActivated?`: `boolean` \| `null`; `isInstalled?`: `boolean` \| `null`; `pluginId?`: `string` \| `null`; \}\> = `QueryPluginsInput`
+> **type**: `InputObjectRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `isActivated?`: `boolean` \| `null`; `isInstalled?`: `boolean` \| `null`; `pluginId?`: `string` \| `null`; \}\> = `QueryPluginsInput`

@@ -4,7 +4,7 @@
 
 # Variable: EmailAddress
 
-> `const` **EmailAddress**: `ScalarRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../type-aliases/CustomScalars.md); \}\>, `string`, `string`, `string`\>
+> `const` **EmailAddress**: `ScalarRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../type-aliases/CustomScalars.md); \}\>, `string`, `string`, `string`\>
 
 Defined in: [src/graphql/scalars/EmailAddress.ts:9](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/scalars/EmailAddress.ts#L9)
 

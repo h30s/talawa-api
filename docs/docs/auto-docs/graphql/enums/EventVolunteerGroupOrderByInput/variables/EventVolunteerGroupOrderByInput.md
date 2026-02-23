@@ -4,7 +4,7 @@
 
 # Variable: EventVolunteerGroupOrderByInput
 
-> `const` **EventVolunteerGroupOrderByInput**: `EnumRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, `"volunteers_ASC"` \| `"volunteers_DESC"` \| `"assignments_ASC"` \| `"assignments_DESC"`, `"volunteers_ASC"` \| `"volunteers_DESC"` \| `"assignments_ASC"` \| `"assignments_DESC"`\>
+> `const` **EventVolunteerGroupOrderByInput**: `EnumRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, `"volunteers_ASC"` \| `"volunteers_DESC"` \| `"assignments_ASC"` \| `"assignments_DESC"`, `"volunteers_ASC"` \| `"volunteers_DESC"` \| `"assignments_ASC"` \| `"assignments_DESC"`\>
 
 Defined in: [src/graphql/enums/EventVolunteerGroupOrderByInput.ts:19](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/enums/EventVolunteerGroupOrderByInput.ts#L19)
 

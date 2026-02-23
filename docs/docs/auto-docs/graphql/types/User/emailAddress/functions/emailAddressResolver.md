@@ -6,7 +6,17 @@
 
 > **emailAddressResolver**(`parent`, `_args`, `ctx`): `Promise`\<`string`\>
 
-Defined in: [src/graphql/types/User/emailAddress.ts:13](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/types/User/emailAddress.ts#L13)
+Defined in: [src/graphql/types/User/emailAddress.ts:22](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/types/User/emailAddress.ts#L22)
+
+Resolver for the User.emailAddress field.
+
+Authorization logic:
+- Users can view their own email address
+- Administrators can view any user's email address
+
+The `authenticated` scope ensures the user is logged in.
+Additional authorization logic checks if the user is viewing their own email
+or is an administrator.
 
 ## Parameters
 

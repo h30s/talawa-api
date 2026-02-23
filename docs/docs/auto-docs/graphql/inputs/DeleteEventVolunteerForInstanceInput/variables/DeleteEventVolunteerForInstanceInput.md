@@ -4,7 +4,7 @@
 
 # Variable: DeleteEventVolunteerForInstanceInput
 
-> `const` **DeleteEventVolunteerForInstanceInput**: `InputObjectRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `recurringEventInstanceId`: `string`; `volunteerId`: `string`; \}\>
+> `const` **DeleteEventVolunteerForInstanceInput**: `InputObjectRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `recurringEventInstanceId`: `string`; `volunteerId`: `string`; \}\>
 
 Defined in: [src/graphql/inputs/DeleteEventVolunteerForInstanceInput.ts:15](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/inputs/DeleteEventVolunteerForInstanceInput.ts#L15)
 

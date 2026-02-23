@@ -4,7 +4,7 @@
 
 # Variable: AgendaItemUrl
 
-> **AgendaItemUrl**: `ImplementableObjectRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `agendaItemId`: `string`; `createdAt`: `Date`; `creatorId`: `string` \| `null`; `id`: `string`; `updatedAt`: `Date` \| `null`; `updaterId`: `string` \| `null`; `url`: `string`; \}, \{ `agendaItemId`: `string`; `createdAt`: `Date`; `creatorId`: `string` \| `null`; `id`: `string`; `updatedAt`: `Date` \| `null`; `updaterId`: `string` \| `null`; `url`: `string`; \}\>
+> **AgendaItemUrl**: `ImplementableObjectRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `agendaItemId`: `string`; `createdAt`: `Date`; `creatorId`: `string` \| `null`; `id`: `string`; `updatedAt`: `Date` \| `null`; `updaterId`: `string` \| `null`; `url`: `string`; \}, \{ `agendaItemId`: `string`; `createdAt`: `Date`; `creatorId`: `string` \| `null`; `id`: `string`; `updatedAt`: `Date` \| `null`; `updaterId`: `string` \| `null`; `url`: `string`; \}\>
 
 Defined in: [src/graphql/types/AgendaItemUrl/AgendaItemUrl.ts:8](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/types/AgendaItemUrl/AgendaItemUrl.ts#L8)
 

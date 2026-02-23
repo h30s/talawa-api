@@ -4,7 +4,7 @@
 
 # Variable: MutationVerifyEmailInput
 
-> `const` **MutationVerifyEmailInput**: `InputObjectRef`\<`ExtendDefaultTypes`\<\{ `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `token`: `string`; \}\>
+> `const` **MutationVerifyEmailInput**: `InputObjectRef`\<`ExtendDefaultTypes`\<\{ `AuthScopes`: [`AuthScopes`](../../../builder/type-aliases/AuthScopes.md); `Context`: [`GraphQLContext`](../../../context/type-aliases/GraphQLContext.md); `Scalars`: [`CustomScalars`](../../../scalars/type-aliases/CustomScalars.md); \}\>, \{ `token`: `string`; \}\>
 
 Defined in: [src/graphql/inputs/MutationVerifyEmailInput.ts:7](https://github.com/PalisadoesFoundation/talawa-api/tree/mainsrc/graphql/inputs/MutationVerifyEmailInput.ts#L7)
 
