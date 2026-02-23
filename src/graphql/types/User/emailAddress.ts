@@ -25,8 +25,15 @@ export const emailAddressResolver = async (
 	ctx: GraphQLContext,
 ) => {
 	// Auth plugin ensures user is authenticated
-	// biome-ignore lint/style/noNonNullAssertion: Safe - auth plugin guarantees user exists
-	const currentUserId = ctx.currentClient.user!.id;
+	const currentUserId = ctx.currentClient.user?.id;
+
+	if (!currentUserId) {
+		throw new TalawaGraphQLError({
+			extensions: {
+				code: "unauthorized_action",
+			},
+		});
+	}
 
 	// Check if user is viewing their own email
 	const isOwnEmail = parent.id === currentUserId;

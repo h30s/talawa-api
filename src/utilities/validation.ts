@@ -10,7 +10,6 @@ import { TalawaGraphQLError } from "./TalawaGraphQLError";
 
 export interface ValidationOptions<
 	TInput = unknown,
-	TResult = unknown,
 	TContext = GraphQLContext,
 > {
 	// Zod schema for input validation
@@ -18,14 +17,14 @@ export interface ValidationOptions<
 	// Custom validation function
 	validate?: (input: TInput, ctx: TContext) => Promise<void> | void;
 	// Transform function to process validated input
-	transform?: (input: TInput) => Promise<TResult> | TResult;
+	transform?: (input: TInput) => Promise<TInput> | TInput;
 }
 
 /**
  * Higher-order function that wraps resolvers with validation logic
  * @param options - Validation configuration
  * @param resolver - The actual resolver function
- * @returns Wrapped resolver with validation
+ * @returns Wrapped resolver with validation applied
  */
 export function withValidation<
 	TArgs = unknown,
@@ -33,7 +32,7 @@ export function withValidation<
 	TParent = unknown,
 	TContext = GraphQLContext,
 >(
-	options: ValidationOptions<TArgs, TResult, TContext>,
+	options: ValidationOptions<TArgs, TContext>,
 	resolver: (parent: TParent, args: TArgs, ctx: TContext) => Promise<TResult>,
 ) {
 	return async (
@@ -71,7 +70,7 @@ export function withValidation<
 					message: `Validation failed: ${errorMessages.join(", ")}`,
 					extensions: {
 						code: ErrorCode.INVALID_INPUT,
-						validationErrors: error.issues,
+						details: `Validation errors: ${JSON.stringify(error.issues)}`,
 					},
 				});
 			}
@@ -95,6 +94,9 @@ export function withValidation<
 
 /**
  * Convenience function for basic input validation with Zod schema
+ * @param schema - Zod schema to validate against
+ * @param resolver - The resolver function to wrap
+ * @returns Wrapped resolver with schema validation applied
  */
 export function validateInput<T, TResult = unknown, TContext = GraphQLContext>(
 	schema: z.ZodSchema<T>,
@@ -109,6 +111,9 @@ export function validateInput<T, TResult = unknown, TContext = GraphQLContext>(
 
 /**
  * Convenience function for custom validation logic
+ * @param validateFn - Custom validation function
+ * @param resolver - The resolver function to wrap
+ * @returns Wrapped resolver with custom validation applied
  */
 export function validateCustom<
 	TArgs = unknown,

@@ -16,8 +16,6 @@ export type AuthScopes = {
 	authenticated: boolean;
 	/** User must have administrator role */
 	administrator: boolean;
-	/** User must be a regular user (authenticated but not necessarily admin) */
-	user: boolean;
 };
 
 /**
@@ -46,29 +44,28 @@ export const builder = new SchemaBuilder<{
 				return {
 					authenticated: false,
 					administrator: false,
-					user: false,
 				};
 			}
 
-			// Get full user details including role
-			const currentUser =
-				await context.drizzleClient.query.usersTable.findFirst({
-					columns: {
-						role: true,
-					},
-					where: (fields, operators) => {
-						// biome-ignore lint/style/noNonNullAssertion: Safe - auth plugin guarantees user exists
-						const currentUserId = context.currentClient.user!.id;
-						return operators.eq(fields.id, currentUserId);
-					},
-				});
-
-			const isAdministrator = currentUser?.role === "administrator";
-
 			return {
 				authenticated: true,
-				administrator: isAdministrator,
-				user: true,
+				administrator: async () => {
+					const currentUserId = context.currentClient.user?.id;
+					if (!currentUserId) return false;
+
+					// Get full user details including role
+					const currentUser =
+						await context.drizzleClient.query.usersTable.findFirst({
+							columns: {
+								role: true,
+							},
+							where: (fields, operators) => {
+								return operators.eq(fields.id, currentUserId);
+							},
+						});
+
+					return currentUser?.role === "administrator";
+				},
 			};
 		},
 		// Configure error handling to throw TalawaGraphQLError

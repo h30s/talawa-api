@@ -151,8 +151,75 @@ describe("validation utilities", () => {
 				resolver,
 			);
 
-			await expect(wrappedResolver({}, {}, {})).rejects.toThrow(
+			const err = await wrappedResolver({}, {}, {}).catch((e) => e);
+			expect(err).toBeInstanceOf(TalawaGraphQLError);
+			expect((err as TalawaGraphQLError).extensions.code).toBe(
+				"internal_server_error",
+			);
+		});
+
+		it("should handle non-Error exceptions (e.g. throwing a string)", async () => {
+			const customValidate = async () => {
+				throw "A raw string error";
+			};
+
+			const resolver = vi.fn();
+			const wrappedResolver = withValidation(
+				{ validate: customValidate },
+				resolver,
+			);
+
+			const err = await wrappedResolver({}, {}, {}).catch((e) => e);
+			expect(err).toBeInstanceOf(TalawaGraphQLError);
+			expect((err as TalawaGraphQLError).extensions.code).toBe(
+				"internal_server_error",
+			);
+		});
+
+		it("should handle both schema and validate correctly", async () => {
+			const schema = z.object({
+				name: z.string().min(1),
+			});
+
+			const customValidate = vi.fn(
+				async (args: { name: string }, _ctx: Record<string, never>) => {
+					if (args.name === "admin") {
+						throw new Error("Cannot be admin");
+					}
+				},
+			);
+
+			const resolver = vi.fn(
+				async (
+					_parent: Record<string, never>,
+					args: { name: string },
+					_ctx: Record<string, never>,
+				) => {
+					return `Hello ${args.name}`;
+				},
+			);
+
+			const wrappedResolver = withValidation(
+				{ schema, validate: customValidate },
+				resolver,
+			);
+
+			// Valid case
+			const result = await wrappedResolver({}, { name: "User" }, {});
+			expect(result).toBe("Hello User");
+
+			// Schema fail case
+			await expect(wrappedResolver({}, { name: "" }, {})).rejects.toThrow(
 				TalawaGraphQLError,
+			);
+
+			// Validate fail case
+			const err = await wrappedResolver({}, { name: "admin" }, {}).catch(
+				(e) => e,
+			);
+			expect(err).toBeInstanceOf(TalawaGraphQLError);
+			expect((err as TalawaGraphQLError).extensions.code).toBe(
+				"internal_server_error",
 			);
 		});
 	});
@@ -206,6 +273,23 @@ describe("validation utilities", () => {
 
 			expect(result).toBe(10);
 			expect(customValidate).toHaveBeenCalled();
+		});
+
+		it("should successfully throw TalawaGraphQLError when customvalidation fails", async () => {
+			const customValidate = vi.fn(async (args: { value: number }) => {
+				if (args.value < 0) {
+					throw new Error("Value must be positive");
+				}
+			});
+
+			const resolver = vi.fn();
+			const wrappedResolver = validateCustom(customValidate, resolver);
+
+			const err = await wrappedResolver({}, { value: -5 }, {}).catch((e) => e);
+			expect(err).toBeInstanceOf(TalawaGraphQLError);
+			expect((err as TalawaGraphQLError).extensions.code).toBe(
+				"internal_server_error",
+			);
 		});
 	});
 });

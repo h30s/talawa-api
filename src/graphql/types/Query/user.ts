@@ -34,7 +34,7 @@ builder.queryField("user", (t) =>
 				schema: queryUserArgumentsSchema,
 			},
 			async (_parent, args, ctx: GraphQLContext) => {
-				const resolver = async () => {
+				return await executeWithMetrics(ctx, "query:user", async () => {
 					// Validation is handled by withValidation wrapper
 					// args are already validated and type-safe
 					const user = await ctx.drizzleClient.query.usersTable.findFirst({
@@ -55,9 +55,7 @@ builder.queryField("user", (t) =>
 					}
 
 					return user;
-				};
-
-				return await executeWithMetrics(ctx, "query:user", resolver);
+				});
 			},
 		),
 		type: User,

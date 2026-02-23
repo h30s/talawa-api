@@ -97,8 +97,15 @@ builder.mutationField("createUser", (t) =>
 
 				// Auth plugin ensures user is authenticated and is an administrator
 				// No need for manual checks - the resolver only runs if authorized
-				// biome-ignore lint/style/noNonNullAssertion: Safe - auth plugin guarantees user exists
-				const currentUserId = ctx.currentClient.user!.id;
+				const currentUserId = ctx.currentClient.user?.id;
+
+				if (!currentUserId) {
+					throw new TalawaGraphQLError({
+						extensions: {
+							code: "unauthorized_action",
+						},
+					});
+				}
 
 				const [existingUserWithEmailAddress] = await Promise.all([
 					ctx.drizzleClient.query.usersTable.findFirst({
@@ -110,10 +117,7 @@ builder.mutationField("createUser", (t) =>
 					}),
 				]);
 
-				if (
-					existingUserWithEmailAddress !== null &&
-					existingUserWithEmailAddress !== undefined
-				) {
+				if (existingUserWithEmailAddress !== undefined) {
 					throw new TalawaGraphQLError({
 						extensions: {
 							code: "forbidden_action_on_arguments_associated_resources",
