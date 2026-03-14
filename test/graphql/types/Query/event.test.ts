@@ -227,8 +227,12 @@ suite("Query field event", () => {
 					},
 				},
 			});
-		} catch {
+		} catch (error) {
 			// Immediate deletion failed — register cleanup as fallback
+			console.error(
+				"Immediate user deletion failed, registering cleanup:",
+				error,
+			);
 			cleanupFunctions.push(async () => {
 				await mercuriusClient.mutate(Mutation_deleteUser, {
 					headers: {
